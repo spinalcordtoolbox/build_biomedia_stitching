@@ -51,7 +51,7 @@ jobs:
         make install
 
     - name: get_boost_apt  
-      run: sudo apt-get -y libboost-all-dev libtbb-dev
+      run: sudo apt-get install -y libboost-all-dev libtbb-dev
 
     - name: make_stitching
       run: |
