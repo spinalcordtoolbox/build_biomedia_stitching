@@ -3,11 +3,11 @@ on:
   push:
     branches:
       - develop
-      - master
+      - main
   pull_request:
     branches:
       - develop
-      - master
+      - main
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@main
       with:
         name: biomedia-mira/stitching   
         ref: refs/heads/release
