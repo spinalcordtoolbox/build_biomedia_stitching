@@ -15,8 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@master
         with:
-          repository: biomedia-mira/stitching
-          ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }}
-      - run: /bin/bash build.sh
+          name: iomedia-mira/stitching   
+          ref: refs/heads/release
+      - name: run bash script 
+        run: |
+          cd stitching
+          /bin/bash build.sh
