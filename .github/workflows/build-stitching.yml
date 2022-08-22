@@ -16,10 +16,10 @@ jobs:
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@master
-        with:
-          name: iomedia-mira/stitching   
-          ref: refs/heads/release
-      - name: run bash script 
-        run: |
-          cd stitching
-          /bin/bash build.sh
+      with:
+        name: biomedia-mira/stitching   
+        ref: refs/heads/release
+    - name: run bash script 
+      run: |
+        cd stitching
+        /bin/bash build.sh
