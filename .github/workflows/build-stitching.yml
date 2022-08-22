@@ -27,8 +27,6 @@ jobs:
         export THIRD_PARTY_DIR=$ROOT/3rdParty
         mkdir $THIRD_PARTY_DIR
 
-    - name: get_eigen
-      run: |
         # get Eigen
         EIGEN_VERSION="3.3.7"
         cd $THIRD_PARTY_DIR
@@ -36,8 +34,6 @@ jobs:
         mkdir eigen
         tar xf eigen-${EIGEN_VERSION}.tar.gz -C eigen --strip-components=1
 
-    - name: install_itk
-      run: |
         # download and install ITK
         ITK_VERSION="5.0.0"
         cd $THIRD_PARTY_DIR
