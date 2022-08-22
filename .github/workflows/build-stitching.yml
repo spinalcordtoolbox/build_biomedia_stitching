@@ -22,5 +22,4 @@ jobs:
     - name: run bash script 
       run: |
         ls -a 
-        cd build_biomedia_stitching
         /bin/bash build.sh
