@@ -19,7 +19,48 @@ jobs:
       with:
         repository: biomedia-mira/stitching   
         ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }} 
-    - name: run bash script 
+
+    - name: prepare_system
       run: |
-        ls -a 
-        /bin/bash build.sh
+        ROOT=$(pwd)
+        # prepare 3-party libs
+        export THIRD_PARTY_DIR=$ROOT/3rdParty
+        mkdir $THIRD_PARTY_DIR
+
+    - name: get_eigen
+      run: |
+        # get Eigen
+        EIGEN_VERSION="3.3.7"
+        cd $THIRD_PARTY_DIR
+        wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz --progress=bar:force:noscroll
+        mkdir eigen
+        tar xf eigen-${EIGEN_VERSION}.tar.gz -C eigen --strip-components=1
+
+    - name: install_itk
+      run: |
+        # download and install ITK
+        ITK_VERSION="5.0.0"
+        cd $THIRD_PARTY_DIR
+        wget https://sourceforge.net/projects/itk/files/itk/${ITK_VERSION%.*}/InsightToolkit-${ITK_VERSION}.tar.gz --progress=bar:force:noscroll
+        tar xf InsightToolkit-${ITK_VERSION}.tar.gz
+        cd InsightToolkit-${ITK_VERSION}
+        mkdir build
+        cd build
+        cmake \
+            -DBUILD_EXAMPLES:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DCMAKE_INSTALL_PREFIX=$THIRD_PARTY_DIR/itk \
+          ..
+        make -j$(nproc)
+        make install
+
+    - name: get_boost_apt  
+      run: sudo apt-get y libboost-all-dev libtbb-dev
+
+    - name: make_stitching
+      run: |
+        cd $ROOT
+        mkdir build
+        cd build
+        cmake ..
+        make -j$(nproc)
