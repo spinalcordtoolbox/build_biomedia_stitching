@@ -1,1 +1,22 @@
-test
+name: Run tests
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - develop
+      - master
+
+jobs:
+  build:
+    name: Run tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: biomedia-mira/stitching
+          ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }}
+      - run: /bin/bash build.sh
