@@ -21,5 +21,6 @@ jobs:
         #ref: d31242797e0438c5de7f5fc69b14697f71c090d5
     - name: run bash script 
       run: |
+        ls -a 
         cd build_biomedia_stitching
         /bin/bash build.sh
