@@ -56,8 +56,11 @@ jobs:
     - name: make_stitching
       run: |
         cd $ROOT
+        ls
         mkdir build
+        ls
         cd build
+        ls
         cmake \ 
           ..
         make -j$(nproc)
