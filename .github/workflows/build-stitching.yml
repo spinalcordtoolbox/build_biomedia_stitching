@@ -17,8 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@main
       with:
-        name: biomedia-mira/stitching   
-        #ref: d31242797e0438c5de7f5fc69b14697f71c090d5
+        repository: biomedia-mira/stitching   
+        ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }} 
     - name: run bash script 
       run: |
         ls -a 
