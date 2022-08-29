@@ -39,9 +39,17 @@ jobs:
         cd boost_1_80_0/
         # build Boost
         ./bootstrap.sh
-        ./b2
+        ./b2 link=static
         # point cmake at the location of the various boost cmake files
         export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
+
+    - name: Ensure static linking of Boost libraries
+      run: |
+        # See: https://github.com/spinalcordtoolbox/spinalcordtoolbox/pull/3865#discussion_r957565175
+        echo "" >> itkio/cmake/FindConfig.cmake
+        echo "set(Boost_USE_STATIC_LIBS ON)" >> itkio/cmake/FindConfig.cmake
+        echo "" >> stitching/cmake/FindConfig.cmake
+        echo "set(Boost_USE_STATIC_LIBS ON)" >> stitching/cmake/FindConfig.cmake
 
     - name: Download and build ITK
       run: |
