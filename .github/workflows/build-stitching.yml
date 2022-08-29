@@ -27,39 +27,39 @@ jobs:
         export THIRD_PARTY_DIR=$ROOT/3rdParty
         mkdir $THIRD_PARTY_DIR
 
-        #        # get Eigen
-        #        EIGEN_VERSION="3.3.7"
-        #        cd $THIRD_PARTY_DIR
-        #        wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz --progress=bar:force:noscroll
-        #        mkdir eigen
-        #        tar xf eigen-${EIGEN_VERSION}.tar.gz -C eigen --strip-components=1
-        #
-        #        # download and install boost
-        #        cd $THIRD_PARTY_DIR
-        #        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz --progress=bar:force:noscroll
-        #        tar xf boost_1_80_0.tar.gz
-        #        cd boost_1_80_0/
-        #        # build Boost
-        #        ./bootstrap.sh
-        #        ./b2
-        #        # point cmake at the location of the various boost cmake files
-        #        export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
-        #
-        #        # download and install ITK
-        #        ITK_VERSION="5.0.0"
-        #        cd $THIRD_PARTY_DIR
-        #        wget https://sourceforge.net/projects/itk/files/itk/${ITK_VERSION%.*}/InsightToolkit-${ITK_VERSION}.tar.gz --progress=bar:force:noscroll
-        #        tar xf InsightToolkit-${ITK_VERSION}.tar.gz
-        #        cd InsightToolkit-${ITK_VERSION}
-        #        mkdir build
-        #        cd build
-        #        cmake \
-        #            -DBUILD_EXAMPLES:BOOL=OFF \
-        #            -DBUILD_TESTING:BOOL=OFF \
-        #            -DCMAKE_INSTALL_PREFIX=$THIRD_PARTY_DIR/itk \
-        #          ..
-        #        make -j$(nproc)
-        #        make install
+        # get Eigen
+        EIGEN_VERSION="3.3.7"
+        cd $THIRD_PARTY_DIR
+        wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz --progress=bar:force:noscroll
+        mkdir eigen
+        tar xf eigen-${EIGEN_VERSION}.tar.gz -C eigen --strip-components=1
+
+        # download and install boost
+        cd $THIRD_PARTY_DIR
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz --progress=bar:force:noscroll
+        tar xf boost_1_80_0.tar.gz
+        cd boost_1_80_0/
+        # build Boost
+        ./bootstrap.sh
+        ./b2
+        # point cmake at the location of the various boost cmake files
+        export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
+
+        # download and install ITK
+        ITK_VERSION="5.0.0"
+        cd $THIRD_PARTY_DIR
+        wget https://sourceforge.net/projects/itk/files/itk/${ITK_VERSION%.*}/InsightToolkit-${ITK_VERSION}.tar.gz --progress=bar:force:noscroll
+        tar xf InsightToolkit-${ITK_VERSION}.tar.gz
+        cd InsightToolkit-${ITK_VERSION}
+        mkdir build
+        cd build
+        cmake \
+            -DBUILD_EXAMPLES:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DCMAKE_INSTALL_PREFIX=$THIRD_PARTY_DIR/itk \
+          ..
+        make -j$(nproc)
+        make install
 
         # build `stitching`
         cd $ROOT
