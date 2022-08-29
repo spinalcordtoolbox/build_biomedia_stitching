@@ -40,8 +40,6 @@ jobs:
         # build Boost
         ./bootstrap.sh
         ./b2 link=static
-        # point cmake at the location of the various boost cmake files
-        export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
 
     - name: Ensure static linking of Boost libraries
       run: |
@@ -69,6 +67,9 @@ jobs:
 
     - name: Build stitching
       run: |
+        export THIRD_PARTY_DIR=${{ env.THIRD_PARTY_DIR }}
+        export ITK_DIR=${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
+        export CMAKE_PREFIX_PATH=${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
         mkdir build
         cd build
         cmake ..
