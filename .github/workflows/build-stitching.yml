@@ -29,11 +29,10 @@ jobs:
         mkdir ${{ env.THIRD_PARTY_DIR }}
 
         # get Eigen
-        EIGEN_VERSION="3.3.7"
         cd ${{ env.THIRD_PARTY_DIR }}
-        wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz --progress=bar:force:noscroll
+        wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz --progress=bar:force:noscroll
         mkdir eigen
-        tar xf eigen-${EIGEN_VERSION}.tar.gz -C eigen --strip-components=1
+        tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
 
         # download and install boost
         cd ${{ env.THIRD_PARTY_DIR }}
@@ -47,11 +46,10 @@ jobs:
         export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
 
         # download and install ITK
-        ITK_VERSION="5.0.0"
         cd ${{ env.THIRD_PARTY_DIR }}
-        wget https://sourceforge.net/projects/itk/files/itk/${ITK_VERSION%.*}/InsightToolkit-${ITK_VERSION}.tar.gz --progress=bar:force:noscroll
-        tar xf InsightToolkit-${ITK_VERSION}.tar.gz
-        cd InsightToolkit-${ITK_VERSION}
+        wget https://sourceforge.net/projects/itk/files/itk/5.0/InsightToolkit-5.0.0.tar.gz --progress=bar:force:noscroll
+        tar xf InsightToolkit-5.0.0.tar.gz
+        cd InsightToolkit-5.0.0
         mkdir build
         cd build
         cmake \
