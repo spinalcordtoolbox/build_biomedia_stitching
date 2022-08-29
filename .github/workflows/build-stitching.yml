@@ -23,18 +23,16 @@ jobs:
         repository: biomedia-mira/stitching   
         ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }} 
 
-    - name: Build dependencies, then build `stitching`
+    - name: Download Eigen
       run: |
-        # prepare 3-party libs
         mkdir ${{ env.THIRD_PARTY_DIR }}
-
-        # get Eigen
         cd ${{ env.THIRD_PARTY_DIR }}
         wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz --progress=bar:force:noscroll
         mkdir eigen
         tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
 
-        # download and install boost
+    - name: Download and build Boost
+      run: |
         cd ${{ env.THIRD_PARTY_DIR }}
         wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz --progress=bar:force:noscroll
         tar xf boost_1_80_0.tar.gz
@@ -45,7 +43,8 @@ jobs:
         # point cmake at the location of the various boost cmake files
         export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
 
-        # download and install ITK
+    - name: Download and build ITK
+      run: |
         cd ${{ env.THIRD_PARTY_DIR }}
         wget https://sourceforge.net/projects/itk/files/itk/5.0/InsightToolkit-5.0.0.tar.gz --progress=bar:force:noscroll
         tar xf InsightToolkit-5.0.0.tar.gz
@@ -60,7 +59,8 @@ jobs:
         make -j$(nproc)
         make install
 
-        # build `stitching`
+    - name: Build stitching
+      run: |
         mkdir build
         cd build
         cmake ..
