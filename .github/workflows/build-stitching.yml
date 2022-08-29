@@ -20,7 +20,7 @@ jobs:
         repository: biomedia-mira/stitching   
         ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }} 
 
-    - name: prepare_system
+    - name: Build dependencies, then build `stitching`
       run: |
         ROOT=$(pwd)
         # prepare 3-party libs
@@ -61,8 +61,7 @@ jobs:
         make -j$(nproc)
         make install
 
-    - name: make_stitching
-      run: |
+        # build `stitching`
         cd $ROOT
         ls
         mkdir build
