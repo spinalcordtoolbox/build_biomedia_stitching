@@ -33,6 +33,17 @@ jobs:
         wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz --progress=bar:force:noscroll
         mkdir eigen
         tar xf eigen-${EIGEN_VERSION}.tar.gz -C eigen --strip-components=1
+        
+        # download and install boost
+        cd $THIRD_PARTY_DIR
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz --progress=bar:force:noscroll
+        tar xf boost_1_80_0.tar.gz 
+        cd boost_1_80_0/
+        # build Boost 
+        ./bootstrap.sh
+        ./b2
+        # point cmake at the location of the various boost cmake files
+        export CMAKE_PREFIX_PATH=../3rdParty/boost_1_80_0/stage/lib/cmake/
 
         # download and install ITK
         ITK_VERSION="5.0.0"
@@ -49,9 +60,6 @@ jobs:
           ..
         make -j$(nproc)
         make install
-
-    - name: get_boost_apt  
-      run: sudo apt-get install -y libboost-all-dev libtbb-dev
 
     - name: make_stitching
       run: |
