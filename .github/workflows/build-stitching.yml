@@ -76,3 +76,17 @@ jobs:
 
     - name: Verify dynamic linking
       run: ldd build/stitching/stitching
+
+    - name: Package files
+      run: |
+        mkdir archive
+        cp build/stitching/stitching archive
+        mkdir archive/copyright
+        cp LICENSE archive/copyright/LICENSE_stitching.txt
+        tar -zcvf stitching_linux.tar.gz archive/
+
+    - name: Upload packaged archive
+      uses: actions/upload-artifact@v2-preview
+      with:
+        name: stitching_linux
+        path: stitching_linux.tar.gz
