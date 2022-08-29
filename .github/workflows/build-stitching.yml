@@ -73,3 +73,6 @@ jobs:
         cd build
         cmake ..
         make -j$(nproc)
+
+    - name: Verify dynamic linking
+      run: ldd build/stitching/stitching
