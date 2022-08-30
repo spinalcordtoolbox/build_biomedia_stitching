@@ -10,8 +10,11 @@ env:
 
 jobs:
   build:
-    name: Build stitching binary (Ubuntu)
-    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macos-10.15]
+    name: Build stitching binary (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 300
     steps:
     - uses: actions/checkout@main
@@ -80,10 +83,10 @@ jobs:
         cp build/stitching/stitching archive
         mkdir archive/copyright
         cp LICENSE archive/copyright/LICENSE_stitching.txt
-        tar -zcvf stitching_linux.tar.gz archive/
+        tar -zcvf stitching_${{ matrix.os }}.tar.gz archive/
 
     - name: Upload packaged archive
       uses: actions/upload-artifact@v2-preview
       with:
-        name: stitching_linux
-        path: stitching_linux.tar.gz
+        name: stitching_${{ matrix.os }}
+        path: stitching_${{ matrix.os }}.tar.gz
