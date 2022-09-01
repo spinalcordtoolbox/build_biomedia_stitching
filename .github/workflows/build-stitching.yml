@@ -40,14 +40,6 @@ jobs:
         ./bootstrap.sh
         ./b2 link=static
 
-    - name: Ensure static linking of Boost libraries
-      run: |
-        # See: https://github.com/spinalcordtoolbox/spinalcordtoolbox/pull/3865#discussion_r957565175
-        echo "" >> itkio/cmake/FindConfig.cmake
-        echo "set(Boost_USE_STATIC_LIBS ON)" >> itkio/cmake/FindConfig.cmake
-        echo "" >> stitching/cmake/FindConfig.cmake
-        echo "set(Boost_USE_STATIC_LIBS ON)" >> stitching/cmake/FindConfig.cmake
-
     - name: Download and build ITK
       run: |
         cd ${{ env.THIRD_PARTY_DIR }}
@@ -63,6 +55,24 @@ jobs:
           ..
         make -j$(nproc)
         make install
+
+    ####################################################################################################################
+    # The following fixes are used to patch files present in the `stitching` repository. If possible, that repo should #
+    # instead be forked, and these fixes should be applied directly to the files themselves.                           #
+    ####################################################################################################################
+    - name: Ensure static linking of Boost libraries
+      run: |
+        # See: https://github.com/spinalcordtoolbox/spinalcordtoolbox/pull/3865#discussion_r957565175
+        echo "" >> itkio/cmake/FindConfig.cmake
+        echo "set(Boost_USE_STATIC_LIBS ON)" >> itkio/cmake/FindConfig.cmake
+        echo "" >> stitching/cmake/FindConfig.cmake
+        echo "set(Boost_USE_STATIC_LIBS ON)" >> stitching/cmake/FindConfig.cmake
+
+    - name: Ensure C++11 is used to build mia
+      run: |
+        # This syntax is meant to prepend text to a file, see: https://stackoverflow.com/a/27950358
+        printf '%s\n%s\n' "set(CMAKE_CXX_STANDARD 11)" "$(cat mia/CMakeLists.txt)" > mia/CMakeLists.txt
+    ####################################################################################################################
 
     - name: Build stitching
       run: |
