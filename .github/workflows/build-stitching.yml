@@ -9,7 +9,7 @@ env:
   THIRD_PARTY_DIR: "$GITHUB_WORKSPACE/3rdParty"
 
 jobs:
-  build:
+  build-unix:
     strategy:
       matrix:
         os: [ubuntu-18.04, macos-10.15]
@@ -96,6 +96,89 @@ jobs:
       run: |
         mkdir archive
         cp build/stitching/stitching archive
+        mkdir archive/copyright
+        cp LICENSE archive/copyright/LICENSE_stitching.txt
+        tar -zcvf stitching_${{ matrix.os }}.tar.gz archive/
+
+    - name: Upload packaged archive
+      uses: actions/upload-artifact@v2-preview
+      with:
+        name: stitching_${{ matrix.os }}
+        path: stitching_${{ matrix.os }}.tar.gz
+
+  build-windows:
+    strategy:
+      matrix:
+        os: [windows-2019]
+    name: Build stitching binary (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 300
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@main
+      with:
+        repository: biomedia-mira/stitching
+        ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }}
+
+    # This action sets up 'cl.exe', which is needed for Boost's `bootstrap.bat`
+    - name: Enable developer command prompt
+      uses: ilammy/msvc-dev-cmd@v1
+
+    # This action sets up 'msbuild.exe', which is a Windows equivalent to make/clang/etc.
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Download Eigen
+      run: |
+        mkdir ${{ env.THIRD_PARTY_DIR }}
+        cd ${{ env.THIRD_PARTY_DIR }}
+        curl https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz -o eigen-3.3.7.tar.gz -L
+        mkdir eigen
+        tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
+
+    - name: Download and build Boost
+      shell: cmd
+      run: |
+        cd ${{ env.THIRD_PARTY_DIR }}
+        curl https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz -o boost_1_18_0.tar.gx -L
+        tar xf boost_1_80_0.tar.gz
+        cd boost_1_80_0/
+        bootstrap.bat
+        .\b2 link=static
+
+    - name: Download and build ITK
+      run: |
+        cd ${{ env.THIRD_PARTY_DIR }}
+        curl https://sourceforge.net/projects/itk/files/itk/5.0/InsightToolkit-5.0.0.tar.gz -o InsightToolkit-5.0.0.tar.gz -L
+        tar xf InsightToolkit-5.0.0.tar.gz
+        cd InsightToolkit-5.0.0
+        # Hotfix for https://github.com/SuperElastix/SimpleElastix/pull/425#issuecomment-878516818
+        sed -i '93,120d' Modules/ThirdParty/OpenJPEG/src/openjpeg/opj_includes.h
+        mkdir build
+        cd build
+        cmake \
+            -DBUILD_EXAMPLES:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DITK_SKIP_PATH_LENGTH_CHECKS=ON \
+          ..
+        msbuild ALL_BUILD.vcxproj -property:Configuration=Release
+
+    - name: Build stitching
+      run: |
+        export THIRD_PARTY_DIR=${{ env.THIRD_PARTY_DIR }}
+        export ITK_DIR=${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
+        export CMAKE_PREFIX_PATH=${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
+        mkdir build
+        cd build
+        cmake ..
+        msbuild ALL_BUILD.vcxproj -property:Configuration=Release
+
+    - name: Package files
+      run: |
+        mkdir archive
+        cp build/stitching/bin/Release/stitching.exe archive
         mkdir archive/copyright
         cp LICENSE archive/copyright/LICENSE_stitching.txt
         tar -zcvf stitching_${{ matrix.os }}.tar.gz archive/
