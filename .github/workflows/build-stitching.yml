@@ -84,8 +84,13 @@ jobs:
         cmake ..
         make -j$(nproc)
 
-    - name: Verify dynamic linking
+    - name: Verify dynamic linking (Ubuntu)
+      if: matrix.os == 'ubuntu-18.04'
       run: ldd build/stitching/stitching
+
+    - name: Verify dynamic linking (macOS)
+      if: matrix.os == 'macos-10.15'
+      run: otool -L build/stitching/stitching
 
     - name: Package files
       run: |
