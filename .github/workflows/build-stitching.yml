@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  THIRD_PARTY_DIR: "$GITHUB_WORKSPACE/3rdParty"
+  THIRD_PARTY_DIR: "3rdParty"
 
 jobs:
   build-unix:
