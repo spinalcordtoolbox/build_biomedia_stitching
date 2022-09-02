@@ -76,11 +76,11 @@ jobs:
 
     - name: Build stitching
       run: |
-        export THIRD_PARTY_DIR=${{ env.THIRD_PARTY_DIR }}
-        export ITK_DIR=${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
-        export CMAKE_PREFIX_PATH=${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
         mkdir build
         cd build
+        export THIRD_PARTY_DIR=../${{ env.THIRD_PARTY_DIR }}
+        export ITK_DIR=../${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
+        export CMAKE_PREFIX_PATH=../${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
         cmake ..
         make -j$(nproc)
 
