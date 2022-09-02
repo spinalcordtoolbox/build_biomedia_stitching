@@ -202,3 +202,65 @@ jobs:
       with:
         name: stitching_${{ matrix.os }}
         path: stitching_${{ matrix.os }}.tar.gz
+
+  release:
+    needs: [build-unix, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # name the release with the run_id to allow multiple builds on the same branch/tag
+          # https://github.com/actions/create-release/issues/2#issuecomment-613591846
+          tag_name: ${{ github.ref }}-${{github.run_id }}
+          release_name: Release ${{ github.sha }}
+          draft: true
+          prerelease: true
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: stitching_ubuntu-18.04
+        continue-on-error: true
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./stitching_ubuntu-18.04/stitching_ubuntu-18.04.tar.gz
+          asset_name: stitching_ubuntu-18.04.tar.gz
+          asset_content_type: application/gzip
+        continue-on-error: true
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: stitching_macos-10.15
+        continue-on-error: true
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./stitching_macos-10.15/stitching_macos-10.15.tar.gz
+          asset_name: stitching_macos-10.15.tar.gz
+          asset_content_type: application/gzip
+        continue-on-error: true
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: stitching_windows-2019
+        continue-on-error: true
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./stitching_windows-2019/stitching_windows-2019.tar.gz
+          asset_name: stitching_windows-2019.tar.gz
+          asset_content_type: application/gzip
+        continue-on-error: true
