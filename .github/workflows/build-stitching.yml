@@ -143,7 +143,7 @@ jobs:
       shell: cmd
       run: |
         cd ${{ env.THIRD_PARTY_DIR }}
-        curl https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz -o boost_1_18_0.tar.gx -L
+        curl https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz -o boost_1_80_0.tar.gz -L
         tar xf boost_1_80_0.tar.gz
         cd boost_1_80_0/
         bootstrap.bat
