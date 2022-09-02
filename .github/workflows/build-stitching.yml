@@ -141,17 +141,22 @@ jobs:
         mkdir eigen
         tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
 
-    - name: Download and build Boost
+    - name: Download and setup Boost
       shell: cmd
       run: |
         cd ${{ env.THIRD_PARTY_DIR }}
         curl https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz -o boost_1_80_0.tar.gz -L
         tar xf boost_1_80_0.tar.gz
-        cd boost_1_80_0/
+        cd boost_1_80_0
         bootstrap.bat
+
+    - name: Build Boost
+      shell: cmd
+      run: | 
+        cd ${{ env.THIRD_PARTY_DIR }}/boost_1_80_0
         .\b2 link=static
 
-    - name: Download and build ITK
+    - name: Download and setup ITK
       run: |
         cd ${{ env.THIRD_PARTY_DIR }}
         curl https://sourceforge.net/projects/itk/files/itk/5.0/InsightToolkit-5.0.0.tar.gz -o InsightToolkit-5.0.0.tar.gz -L
@@ -166,9 +171,14 @@ jobs:
             -DBUILD_TESTING:BOOL=OFF \
             -DITK_SKIP_PATH_LENGTH_CHECKS=ON \
           ..
+
+    - name: Build ITK
+      shell: cmd
+      run: |
+        cd ${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
         msbuild ALL_BUILD.vcxproj -property:Configuration=Release
 
-    - name: Build stitching
+    - name: Setup stitching
       run: |
         export THIRD_PARTY_DIR=${{ env.THIRD_PARTY_DIR }}
         export ITK_DIR=${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
@@ -176,6 +186,11 @@ jobs:
         mkdir build
         cd build
         cmake ..
+
+    - name: Build stitching
+      shell: cmd
+      run: |
+        cd build
         msbuild ALL_BUILD.vcxproj -property:Configuration=Release
 
     - name: Package files
