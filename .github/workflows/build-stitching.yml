@@ -130,6 +130,8 @@ jobs:
     # This action sets up 'msbuild.exe', which is a Windows equivalent to make/clang/etc.
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
 
     - name: Download Eigen
       run: |
