@@ -90,7 +90,7 @@ jobs:
         make -j$(nproc)
 
     - name: Verify dynamic linking (Ubuntu)
-      if: matrix.os == 'ubuntu-18.04'
+      if: matrix.os == 'ubuntu-20.04'
       run: ldd build/stitching/stitching
 
     - name: Verify dynamic linking (macOS)
@@ -227,7 +227,7 @@ jobs:
 
       - uses: actions/download-artifact@v1
         with:
-          name: stitching_ubuntu-18.04
+          name: stitching_ubuntu-20.04
         continue-on-error: true
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -235,8 +235,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./stitching_ubuntu-18.04/stitching_ubuntu-18.04.tar.gz
-          asset_name: stitching_ubuntu-18.04.tar.gz
+          asset_path: ./stitching_ubuntu-20.04/stitching_ubuntu-20.04.tar.gz
+          asset_name: stitching_ubuntu-20.04.tar.gz
           asset_content_type: application/gzip
         continue-on-error: true
 
