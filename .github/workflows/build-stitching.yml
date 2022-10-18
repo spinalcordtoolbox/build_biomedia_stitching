@@ -1,6 +1,10 @@
 name: Build stitching binary
 on:
   workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'Release name'
+        required: true
   pull_request:
     branches:
       - develop
@@ -216,8 +220,8 @@ jobs:
         with:
           # name the release with the run_id to allow multiple builds on the same branch/tag
           # https://github.com/actions/create-release/issues/2#issuecomment-613591846
-          tag_name: ${{ github.ref }}-${{github.run_id }}
-          release_name: Release ${{ github.sha }}
+          tag_name: ${{ github.event.inputs.release_name }}
+          release_name: Release ${{ github.event.inputs.release_name }}
           draft: true
           prerelease: true
 
