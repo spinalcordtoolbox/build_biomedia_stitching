@@ -13,10 +13,111 @@ env:
   THIRD_PARTY_DIR: "3rdParty"
 
 jobs:
-  build-unix:
+  build-linux:
+    name: Build stitching binary (CentOS 7)
+    runs-on: ubuntu-20.04
+    container: centos:7
+    steps:
+    - name: Dependencies
+      run: |
+        yum install -y gcc git curl wget python3 python3-devel python python-devel ca-certificates
+        yum groups mark install "Development Tools"
+        yum groups mark convert "Development Tools"
+        yum groupinstall -y "Development Tools"
+        find /usr/include -name pyconfig.h
+
+    - name: Build and install cmake3
+      run: |
+        wget https://cmake.org/files/v3.12/cmake-3.12.3.tar.gz
+        tar zxvf cmake-3.*
+        cd cmake-3.*
+        ./bootstrap --prefix=/usr
+        make -j$(nproc)
+        make install
+
+    - uses: actions/checkout@main
+      with:
+        repository: biomedia-mira/stitching   
+        ref: ${{ github.event.inputs.git_ref || 'd31242797e0438c5de7f5fc69b14697f71c090d5' }} 
+
+    - name: Download Eigen
+      run: |
+        mkdir ${{ env.THIRD_PARTY_DIR }}
+        cd ${{ env.THIRD_PARTY_DIR }}
+        wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz --progress=bar:force:noscroll
+        mkdir eigen
+        tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
+    - name: Download and build Boost
+      run: |
+        cd ${{ env.THIRD_PARTY_DIR }}
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz --progress=bar:force:noscroll
+        tar xf boost_1_80_0.tar.gz
+        cd boost_1_80_0/
+        # build Boost
+        ./bootstrap.sh
+        ./b2 link=static
+    - name: Download and build ITK
+      run: |
+        cd ${{ env.THIRD_PARTY_DIR }}
+        wget https://sourceforge.net/projects/itk/files/itk/5.0/InsightToolkit-5.0.0.tar.gz --progress=bar:force:noscroll
+        tar xf InsightToolkit-5.0.0.tar.gz
+        cd InsightToolkit-5.0.0
+        mkdir build
+        cd build
+        cmake \
+            -DBUILD_EXAMPLES:BOOL=OFF \
+            -DBUILD_TESTING:BOOL=OFF \
+            -DCMAKE_INSTALL_PREFIX=${{ env.THIRD_PARTY_DIR }}/itk \
+          ..
+        make -j$(nproc)
+        make install
+    ####################################################################################################################
+    # The following fixes are used to patch files present in the `stitching` repository. If possible, that repo should #
+    # instead be forked, and these fixes should be applied directly to the files themselves.                           #
+    ####################################################################################################################
+    - name: Ensure static linking of Boost libraries
+      run: |
+        # See: https://github.com/spinalcordtoolbox/spinalcordtoolbox/pull/3865#discussion_r957565175
+        echo "" >> itkio/cmake/FindConfig.cmake
+        echo "set(Boost_USE_STATIC_LIBS ON)" >> itkio/cmake/FindConfig.cmake
+        echo "" >> stitching/cmake/FindConfig.cmake
+        echo "set(Boost_USE_STATIC_LIBS ON)" >> stitching/cmake/FindConfig.cmake
+    - name: Ensure C++11 is used to build mia
+      run: |
+        # This syntax is meant to prepend text to a file, see: https://stackoverflow.com/a/27950358
+        printf '%s\n%s\n' "set(CMAKE_CXX_STANDARD 11)" "$(cat mia/CMakeLists.txt)" > mia/CMakeLists.txt
+    ####################################################################################################################
+
+    - name: Build stitching
+      run: |
+        mkdir build
+        cd build
+        export THIRD_PARTY_DIR=../${{ env.THIRD_PARTY_DIR }}
+        export ITK_DIR=../${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
+        export CMAKE_PREFIX_PATH=../${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
+        cmake ..
+        make -j$(nproc)
+        
+    - name: Verify dynamic linking
+      run: ldd build/stitching/stitching
+
+    - name: Package files
+      run: |
+        mkdir archive
+        cp build/stitching/stitching archive
+        mkdir archive/copyright
+        cp LICENSE archive/copyright/LICENSE_stitching.txt
+        tar -zcvf stitching_centos-7.tar.gz archive/
+    - name: Upload packaged archive
+      uses: actions/upload-artifact@v2-preview
+      with:
+        name: stitching_centos-7
+        path: stitching_centos-7.tar.gz
+        
+  build-macos:
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-10.15]
+        os: [macos-10.15]
     name: Build stitching binary (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 300
@@ -88,12 +189,7 @@ jobs:
         cmake ..
         make -j$(nproc)
 
-    - name: Verify dynamic linking (Ubuntu)
-      if: matrix.os == 'ubuntu-20.04'
-      run: ldd build/stitching/stitching
-
-    - name: Verify dynamic linking (macOS)
-      if: matrix.os == 'macos-10.15'
+    - name: Verify dynamic linking
       run: otool -L build/stitching/stitching
 
     - name: Package files
@@ -208,7 +304,7 @@ jobs:
         path: stitching_${{ matrix.os }}.tar.gz
 
   release:
-    needs: [build-unix, build-windows]
+    needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
     # Only create the release if workflow is run manually. (This allows the other steps in the workflow to test PRs.)
     if: github.event_name == 'workflow_dispatch'
@@ -228,7 +324,7 @@ jobs:
 
       - uses: actions/download-artifact@v1
         with:
-          name: stitching_ubuntu-20.04
+          name: stitching_centos-7
         continue-on-error: true
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -236,8 +332,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./stitching_ubuntu-20.04/stitching_ubuntu-20.04.tar.gz
-          asset_name: stitching_ubuntu-20.04.tar.gz
+          asset_path: ./stitching_centos-7/stitching_centos-7.tar.gz
+          asset_name: stitching_centos-7.tar.gz
           asset_content_type: application/gzip
         continue-on-error: true
 
