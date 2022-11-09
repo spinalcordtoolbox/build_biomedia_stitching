@@ -23,7 +23,7 @@ jobs:
     steps:
     - name: Dependencies
       run: |
-        yum install -y gcc git curl wget
+        yum install -y gcc git curl wget python3
         yum groups mark install "Development Tools"
         yum groups mark convert "Development Tools"
         yum groupinstall -y "Development Tools"
