@@ -134,6 +134,7 @@ jobs:
         wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz --progress=bar:force:noscroll
         mkdir eigen
         tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
+
     - name: Download and build Boost
       run: |
         cd ${{ env.THIRD_PARTY_DIR }}
@@ -143,6 +144,7 @@ jobs:
         # build Boost
         ./bootstrap.sh
         ./b2 link=static
+
     - name: Download and build ITK
       run: |
         cd ${{ env.THIRD_PARTY_DIR }}
@@ -158,6 +160,7 @@ jobs:
           ..
         make -j$(nproc)
         make install
+
     ####################################################################################################################
     # The following fixes are used to patch files present in the `stitching` repository. If possible, that repo should #
     # instead be forked, and these fixes should be applied directly to the files themselves.                           #
@@ -169,6 +172,7 @@ jobs:
         echo "set(Boost_USE_STATIC_LIBS ON)" >> itkio/cmake/FindConfig.cmake
         echo "" >> stitching/cmake/FindConfig.cmake
         echo "set(Boost_USE_STATIC_LIBS ON)" >> stitching/cmake/FindConfig.cmake
+
     - name: Ensure C++11 is used to build mia
       run: |
         # This syntax is meant to prepend text to a file, see: https://stackoverflow.com/a/27950358
@@ -195,6 +199,7 @@ jobs:
         mkdir archive/copyright
         cp LICENSE archive/copyright/LICENSE_stitching.txt
         tar -zcvf stitching_${{ matrix.os }}.tar.gz archive/
+
     - name: Upload packaged archive
       uses: actions/upload-artifact@v2-preview
       with:
@@ -234,6 +239,7 @@ jobs:
         curl https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz -o eigen-3.3.7.tar.gz -L
         mkdir eigen
         tar xf eigen-3.3.7.tar.gz -C eigen --strip-components=1
+
     - name: Download and setup Boost
       shell: cmd
       working-directory: ${{ env.THIRD_PARTY_DIR }}
@@ -242,6 +248,7 @@ jobs:
         tar xf boost_1_80_0.tar.gz
         cd boost_1_80_0
         bootstrap.bat
+
     - name: Build Boost
       shell: cmd
       working-directory: ${{ env.THIRD_PARTY_DIR }}/boost_1_80_0
@@ -262,6 +269,7 @@ jobs:
             -DBUILD_TESTING:BOOL=OFF \
             -DITK_SKIP_PATH_LENGTH_CHECKS=ON \
           ..
+
     - name: Build ITK
       shell: cmd
       working-directory: ${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
@@ -275,6 +283,7 @@ jobs:
         export ITK_DIR=../${{ env.THIRD_PARTY_DIR }}/InsightToolkit-5.0.0/build
         export CMAKE_PREFIX_PATH=../${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
         cmake ..
+
     - name: Build stitching
       shell: cmd
       working-directory: build
@@ -287,12 +296,13 @@ jobs:
         mkdir archive/copyright
         cp LICENSE archive/copyright/LICENSE_stitching.txt
         tar -zcvf stitching_${{ matrix.os }}.tar.gz archive/
+
     - name: Upload packaged archive
       uses: actions/upload-artifact@v2-preview
       with:
         name: stitching_${{ matrix.os }}
         path: stitching_${{ matrix.os }}.tar.gz
-        
+
   release:
     needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
