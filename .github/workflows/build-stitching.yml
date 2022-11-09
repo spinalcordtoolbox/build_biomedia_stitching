@@ -26,7 +26,7 @@ jobs:
         yum install -y gcc git curl wget
         yum groups mark install "Development Tools"
         yum groups mark convert "Development Tools"
-        yum groupinstall "Development Tools"
+        yum groupinstall -y "Development Tools"
 
     - uses: actions/checkout@main
       with:
