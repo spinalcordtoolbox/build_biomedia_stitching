@@ -7,8 +7,7 @@ on:
         required: true
   pull_request:
     branches:
-      - develop
-      - main
+      - '*'
 
 env:
   THIRD_PARTY_DIR: "3rdParty"
