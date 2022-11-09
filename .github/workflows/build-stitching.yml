@@ -23,7 +23,7 @@ jobs:
     steps:
     - name: Dependencies
       run: |
-        yum install -y gcc git curl
+        yum install -y gcc git curl wget
     - uses: actions/checkout@main
       with:
         repository: biomedia-mira/stitching   
