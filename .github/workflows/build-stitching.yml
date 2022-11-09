@@ -28,6 +28,11 @@ jobs:
         yum groups mark convert "Development Tools"
         yum groupinstall -y "Development Tools"
         find /usr/include -name pyconfig.h
+        
+    # Source: https://stackoverflow.com/a/48842999
+    - name: Ensure cmake3 is prioritized over cmake2
+      run: | 
+        ln -s /usr/bin/cmake3 /usr/bin/cmake
 
     - uses: actions/checkout@main
       with:
