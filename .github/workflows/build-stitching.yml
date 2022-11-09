@@ -14,11 +14,8 @@ env:
 
 jobs:
   build-linux:
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
     name: Build stitching binary (CentOS 7)
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-20.04
     container: centos:7
     steps:
     - name: Dependencies
@@ -100,13 +97,9 @@ jobs:
         export CMAKE_PREFIX_PATH=../${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
         cmake ..
         make -j$(nproc)
-    - name: Verify dynamic linking (Ubuntu)
-      if: matrix.os == 'ubuntu-20.04'
+        
+    - name: Verify dynamic linking
       run: ldd build/stitching/stitching
-
-    - name: Verify dynamic linking (macOS)
-      if: matrix.os == 'macos-10.15'
-      run: otool -L build/stitching/stitching
 
     - name: Package files
       run: |
@@ -114,12 +107,12 @@ jobs:
         cp build/stitching/stitching archive
         mkdir archive/copyright
         cp LICENSE archive/copyright/LICENSE_stitching.txt
-        tar -zcvf stitching_${{ matrix.os }}.tar.gz archive/
+        tar -zcvf stitching_centos-7.tar.gz archive/
     - name: Upload packaged archive
       uses: actions/upload-artifact@v2-preview
       with:
-        name: stitching_${{ matrix.os }}
-        path: stitching_${{ matrix.os }}.tar.gz
+        name: stitching_centos-7
+        path: stitching_centos-7.tar.gz
         
   build-macos:
     strategy:
@@ -191,12 +184,8 @@ jobs:
         export CMAKE_PREFIX_PATH=../${{ env.THIRD_PARTY_DIR }}/boost_1_80_0/stage/lib/cmake/
         cmake ..
         make -j$(nproc)
-    - name: Verify dynamic linking (Ubuntu)
-      if: matrix.os == 'ubuntu-20.04'
-      run: ldd build/stitching/stitching
 
-    - name: Verify dynamic linking (macOS)
-      if: matrix.os == 'macos-10.15'
+    - name: Verify dynamic linking
       run: otool -L build/stitching/stitching
 
     - name: Package files
@@ -325,7 +314,7 @@ jobs:
 
       - uses: actions/download-artifact@v1
         with:
-          name: stitching_ubuntu-20.04
+          name: stitching_centos-7
         continue-on-error: true
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -333,8 +322,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./stitching_ubuntu-20.04/stitching_ubuntu-20.04.tar.gz
-          asset_name: stitching_ubuntu-20.04.tar.gz
+          asset_path: ./stitching_centos-7/stitching_centos-7.tar.gz
+          asset_name: stitching_centos-7.tar.gz
           asset_content_type: application/gzip
         continue-on-error: true
 
